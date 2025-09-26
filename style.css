@@ -1,0 +1,258 @@
+/* --- Root Variables for Theming --- */
+:root {
+    --bg-color: #f8f8f8;
+    --card-bg: #ffffff;
+    --text-color: #333333; 
+    --primary-color: #7d4d73; 
+    --secondary-color: #707070;
+    --border-color: #e0e0e0;
+    --highlight-color: #ffe599;
+    --header-text-color: #333333;
+    --tts-color: #7d4d73;
+    --tts-hover-bg: rgba(125, 77, 115, 0.1);
+}
+
+/* --- Dark Mode Variables --- */
+body.dark-mode {
+    --bg-color: #1c1c1c;
+    --card-bg: #2a2a2a;
+    --text-color: #e8e8e8;
+    --primary-color: #bfa3b8;
+    --secondary-color: #a0a0a0;
+    --border-color: #444444;
+    --highlight-color: #ffc107;
+    --header-text-color: #e8e8e8;
+    --tts-color: #bfa3b8;
+    --tts-hover-bg: rgba(191, 163, 184, 0.2);
+}
+
+/* --- General Styles --- */
+body {
+    padding: 20px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    line-height: 1.6;
+    font-family: 'Poppins', Arial, sans-serif;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+h1 { 
+    color: var(--header-text-color);
+    font-size: 2.2em;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* --- Controls & Icons --- */
+#dark-mode-toggle,
+#view-by-letter-toggle,
+#back-to-main-view {
+    background: none;
+    border: none;
+    color: var(--secondary-color);
+    font-size: 1.5em; 
+    width: 44px; 
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+#dark-mode-toggle:hover,
+#view-by-letter-toggle:hover,
+#back-to-main-view:hover {
+    color: var(--primary-color);
+    background-color: rgba(125, 77, 115, 0.1);
+}
+
+#controls {
+    margin-bottom: 30px;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 25px;
+    background-color: var(--card-bg);
+    transition: border-color 0.3s;
+}
+
+.search-container i {
+    color: var(--secondary-color);
+    font-size: 1.2em;
+    margin-right: 10px;
+}
+
+#search-input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    background: transparent;
+    color: var(--text-color);
+}
+
+/* --- Dictionary Entry --- */
+.dictionary-entry { 
+    border: 1px solid var(--border-color);
+    padding: 15px; 
+    margin-bottom: 15px; 
+    border-radius: 8px;
+    background-color: var(--card-bg); 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: background-color 0.3s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.entry-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+.limbu-word { 
+    font-size: 1.6em; 
+    color: var(--primary-color);
+}
+
+.secondary-info {
+    font-size: 1em;
+    color: var(--secondary-color);
+    font-style: italic;
+    font-weight: 400;
+}
+
+.meaning-text { 
+    margin-top: 8px; 
+    color: var(--text-color); 
+    white-space: pre-wrap; 
+    line-height: 1.5;
+}
+
+/* --- TTS Button Styling --- */
+.tts-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--tts-color);
+    font-size: 1.2em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, color 0.2s;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+}
+
+.tts-btn:hover {
+    background-color: var(--tts-hover-bg);
+}
+
+/* --- Highlighting & Loading --- */
+.highlight {
+    background-color: var(--highlight-color);
+    color: black;
+    padding: 1px 2px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.1em;
+    color: var(--secondary-color);
+}
+
+/* --- Letter Index Styling --- */
+.letter-index-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#letter-index-view h2 {
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin: 0;
+    flex-grow: 1;
+}
+
+#letter-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+}
+
+.letter-group-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 1.5em;
+    font-family: 'Noto Sans Limbu', sans-serif;
+    font-weight: 700;
+    color: var(--primary-color);
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.letter-group-card:hover {
+    background-color: var(--border-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+body.dark-mode .letter-group-card:hover {
+    background-color: #37475a;
+}
+
+/* --- Responsive Adjustments --- */
+@media screen and (max-width: 600px) {
+    .entry-header {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .limbu-word {
+        font-size: 1.4em;
+    }
+
+    .tts-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 1em;
+    }
+
+    .secondary-info {
+        font-size: 0.9em;
+    }
+}

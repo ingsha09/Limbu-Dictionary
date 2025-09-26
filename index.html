@@ -19,10 +19,10 @@
     <header>
         <h1>Limbu Dictionary</h1>
         <div class="header-actions">
-            <button id="view-by-letter-toggle" aria-label="View by Letter" title="View by Letter">
+            <button id="view-by-letter-toggle" class="icon-btn" aria-label="View by Letter" title="View by Letter">
                 <i class='bx bxs-grid-alt'></i>
             </button>
-            <button id="dark-mode-toggle" aria-label="Toggle Dark Mode" title="Toggle Dark Mode">
+            <button id="dark-mode-toggle" class="icon-btn" aria-label="Toggle Dark Mode" title="Toggle Dark Mode">
                 <i class="bx bx-moon"></i>
             </button>
         </div>
@@ -36,7 +36,6 @@
             </div>
         </div>
         
-        <!-- Add this inside the #main-view, above #dictionary-container -->
         <div id="selected-letter-header" style="display:none;"></div>
 
         <div id="dictionary-container">
@@ -49,7 +48,6 @@
     <div id="letter-index-view" style="display:none;">
         <div class="letter-index-header">
             <h2>Dictionary Index</h2>
-            
         </div>
         <div id="letter-list"></div>
     </div>

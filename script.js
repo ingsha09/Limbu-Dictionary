@@ -1,4 +1,4 @@
-const CDN_URL = 'https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@refs/heads/main/data.json'; 
+const CDN_URL = 'https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@refs/heads/main/data.json';
 
 // --- DOM Elements ---
 const mainView = document.getElementById('main-view');
@@ -106,7 +106,7 @@ function speakNepali(text) {
 // --- Render Next Batch ---
 function renderNextBatch() {
     if (currentIndex >= filteredEntries.length || isLoading) {
-        loadingIndicator.textContent = currentIndex >= filteredEntries.length ? 
+        loadingIndicator.textContent = currentIndex >= filteredEntries.length ?
             `End of list. Total entries: ${filteredEntries.length}` : '';
         return;
     }
@@ -120,8 +120,8 @@ function renderNextBatch() {
     currentIndex = end;
     isLoading = false;
 
-    loadingIndicator.textContent = currentIndex < filteredEntries.length ? 
-        `Scroll down to load more... (${currentIndex}/${filteredEntries.length})` : 
+    loadingIndicator.textContent = currentIndex < filteredEntries.length ?
+        `Scroll down to load more... (${currentIndex}/${filteredEntries.length})` :
         `End of list. Total entries: ${filteredEntries.length}`;
 }
 
@@ -130,10 +130,11 @@ let searchTimeout;
 searchInput.addEventListener('input', () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-        mainView.style.display = 'block';
-        letterIndexView.style.display = 'none';
-        viewByLetterToggle.querySelector('i').className = 'bx bxs-grid-alt';
-        document.querySelector('h1').textContent = 'Limbu Dictionary';
+        // When searching, always ensure we are on the main view
+        if (mainView.style.display === 'none') {
+            showMainView();
+            // We don't want to add a history state for a search, so we just switch view
+        }
         applyFilter(searchInput.value);
     }, 300);
 });
@@ -186,46 +187,74 @@ function populateLetterIndex(letters) {
         card.className = 'letter-group-card';
         card.textContent = letter;
         card.addEventListener('click', () => {
-            mainView.style.display = 'block';
-            letterIndexView.style.display = 'none';
-            filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === letter);
-            currentSearchTerm = '';
-            container.innerHTML = '';
-            currentIndex = 0;
-            renderNextBatch();
+            // When a letter is clicked, go back to the main view and filter
+            history.back(); // This will trigger the popstate event to show the main view
+            
+            // We need a slight delay for the view to switch before filtering
+            setTimeout(() => {
+                filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === letter);
+                currentSearchTerm = '';
+                container.innerHTML = '';
+                currentIndex = 0;
+                renderNextBatch();
+            }, 0);
         });
         letterList.appendChild(card);
     });
 }
 
-// --- Toggle Views ---
-function toggleView() {
-    const mainVisible = mainView.style.display !== 'none';
-    if (mainVisible) {
-        mainView.style.display = 'none';
-        letterIndexView.style.display = 'block';
-        window.removeEventListener('scroll', handleScroll);
-        viewByLetterToggle.querySelector('i').className = 'bx bx-x';
-        populateLetterIndex(extractUniqueLetters());
-    } else {
-        mainView.style.display = 'block';
-        letterIndexView.style.display = 'none';
-        window.addEventListener('scroll', handleScroll);
-        viewByLetterToggle.querySelector('i').className = 'bx bxs-grid-alt';
-        document.querySelector('h1').textContent = 'Limbu Dictionary';
-        filteredEntries = allEntries;
-        currentSearchTerm = '';
-        container.innerHTML = '';
-        currentIndex = 0;
-        renderNextBatch();
-    }
+
+// --- HISTORY API & VIEW MANAGEMENT (THE FIX) ---
+
+function showMainView() {
+    mainView.style.display = 'block';
+    letterIndexView.style.display = 'none';
+    window.addEventListener('scroll', handleScroll);
+    viewByLetterToggle.querySelector('i').className = 'bx bxs-grid-alt'; // Show grid icon
 }
 
-viewByLetterToggle.addEventListener('click', toggleView);
-backToMainViewBtn.addEventListener('click', toggleView);
+function showIndexView() {
+    mainView.style.display = 'none';
+    letterIndexView.style.display = 'block';
+    window.removeEventListener('scroll', handleScroll);
+    viewByLetterToggle.querySelector('i').className = 'bx bx-x'; // Show close icon
+    populateLetterIndex(extractUniqueLetters());
+}
+
+// Handle clicks on the main toggle button
+viewByLetterToggle.addEventListener('click', () => {
+    const isMainViewVisible = mainView.style.display !== 'none';
+    if (isMainViewVisible) {
+        // From main to index: push a new state
+        history.pushState({ view: 'index' }, '', '#index');
+        showIndexView();
+    } else {
+        // From index to main: go back in history
+        history.back();
+    }
+});
+
+// The back button inside the index view should also go back
+backToMainViewBtn.addEventListener('click', () => {
+    history.back();
+});
+
+// Listen for browser back/forward button clicks
+window.addEventListener('popstate', (event) => {
+    // If the state is null, it means we're at the initial page load state
+    if (!event.state || event.state.view === 'main') {
+        showMainView();
+    } else if (event.state.view === 'index') {
+        showIndexView();
+    }
+});
+
 
 // --- Initialize App ---
 function initApp() {
+    // Set the initial history state to 'main'
+    history.replaceState({ view: 'main' }, '', window.location.pathname);
+
     if (localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-mode');
         darkModeToggle.querySelector('i').classList.add('bx-sun');
@@ -238,8 +267,15 @@ function initApp() {
             allEntries = Object.entries(data).sort(limbuSort);
             filteredEntries = allEntries;
             initialLoading.style.display = 'none';
-            renderNextBatch();
-            window.addEventListener('scroll', handleScroll);
+            
+            // Show the correct view on initial load based on URL hash
+            if (window.location.hash === '#index') {
+                showIndexView();
+            } else {
+                showMainView();
+            }
+            
+            renderNextBatch(); // Initial render
         })
         .catch(err => {
             console.error(err);

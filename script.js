@@ -1,3 +1,7 @@
+// --- Limbu Dictionary SPA Enhancement ---
+// Show selected Limbu letter at top when filtering by letter
+// Ensure back button returns to letter index, not main view or kills SPA
+
 const CDN_URL = 'https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@refs/heads/main/data.json';
 
 // --- DOM Elements ---
@@ -11,6 +15,36 @@ const searchInput = document.getElementById('search-input');
 const darkModeToggle = document.getElementById('dark-mode-toggle');
 const viewByLetterToggle = document.getElementById('view-by-letter-toggle');
 const backToMainViewBtn = document.getElementById('back-to-main-view');
+
+// --- New: Selected Letter Header ---
+let selectedLetterHeader = document.getElementById('selected-letter-header');
+if (!selectedLetterHeader) {
+    selectedLetterHeader = document.createElement('div');
+    selectedLetterHeader.id = 'selected-letter-header';
+    selectedLetterHeader.style.display = 'none';
+    selectedLetterHeader.style.marginBottom = '1em';
+    mainView.insertBefore(selectedLetterHeader, container);
+}
+
+let currentLetter = null; // Tracks currently selected letter
+
+function showLetterHeader(letter) {
+    selectedLetterHeader.style.display = 'block';
+    selectedLetterHeader.innerHTML = `
+        <div class="letter-header" style="display:flex;align-items:center;gap:1em;font-size:2em;">
+            <span class="selected-limbu-letter" style="font-size:2.5em;font-weight:bold;">${letter}</span>
+            <button id="back-to-index-btn" title="Back" style="background:none;border:none;font-size:1.5em;cursor:pointer;"><i class="bx bx-arrow-back"></i></button>
+        </div>
+    `;
+    document.getElementById('back-to-index-btn').onclick = function() {
+        history.back();
+    };
+}
+
+function hideLetterHeader() {
+    selectedLetterHeader.style.display = 'none';
+    selectedLetterHeader.innerHTML = '';
+}
 
 // --- Limbu Alphabet & Combining ---
 const limbuAlphabet = [
@@ -130,10 +164,8 @@ let searchTimeout;
 searchInput.addEventListener('input', () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-        // When searching, always ensure we are on the main view
         if (mainView.style.display === 'none') {
             showMainView();
-            // We don't want to add a history state for a search, so we just switch view
         }
         applyFilter(searchInput.value);
     }, 300);
@@ -153,6 +185,10 @@ function applyFilter(term) {
     currentIndex = 0;
     window.addEventListener('scroll', handleScroll);
     renderNextBatch();
+
+    // If filtering by search, hide letter header
+    hideLetterHeader();
+    currentLetter = null;
 }
 
 // --- Scroll Handler ---
@@ -176,7 +212,7 @@ darkModeToggle.addEventListener('click', toggleDarkMode);
 function extractUniqueLetters() {
     const letters = allEntries
         .map(([k, e]) => fixStandaloneLimbu(e.dId || '')[0])
-        .filter(ch => limbuAlphabet.includes(ch)); // Only valid Limbu letters
+        .filter(ch => limbuAlphabet.includes(ch));
     return [...new Set(letters)].sort((a, b) => limbuAlphabet.indexOf(a) - limbuAlphabet.indexOf(b));
 }
 
@@ -187,40 +223,40 @@ function populateLetterIndex(letters) {
         card.className = 'letter-group-card';
         card.textContent = letter;
         card.addEventListener('click', () => {
-            history.back(); // This will trigger the popstate event to show the main view
-            
-            // We need a slight delay for the view to switch before filtering
-            setTimeout(() => {
-                filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === letter);
-                currentSearchTerm = '';
-                container.innerHTML = '';
-                currentIndex = 0;
-                renderNextBatch();
-            }, 0);
+            history.pushState({ view: 'letter', letter }, '', `#letter-${letter}`);
+            showMainView();
+            currentLetter = letter;
+            showLetterHeader(letter);
+            filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === letter);
+            currentSearchTerm = '';
+            container.innerHTML = '';
+            currentIndex = 0;
+            renderNextBatch();
         });
         letterList.appendChild(card);
     });
 }
 
-
-// --- HISTORY API & VIEW MANAGEMENT (THE FIX) ---
+// --- HISTORY API & VIEW MANAGEMENT (ENHANCED) ---
 
 function showMainView() {
     mainView.style.display = 'block';
     letterIndexView.style.display = 'none';
     window.addEventListener('scroll', handleScroll);
-    viewByLetterToggle.querySelector('i').className = 'bx bxs-grid-alt'; // Show grid icon
+    viewByLetterToggle.querySelector('i').className = 'bx bxs-grid-alt';
+    if (!currentLetter) hideLetterHeader();
 }
 
 function showIndexView() {
     mainView.style.display = 'none';
     letterIndexView.style.display = 'block';
     window.removeEventListener('scroll', handleScroll);
-    viewByLetterToggle.querySelector('i').className = 'bx bx-x'; // Show close icon
+    viewByLetterToggle.querySelector('i').className = 'bx bx-x';
+    hideLetterHeader();
+    currentLetter = null;
     populateLetterIndex(extractUniqueLetters());
 }
 
-// Handle clicks on the main toggle button
 viewByLetterToggle.addEventListener('click', () => {
     const isMainViewVisible = mainView.style.display !== 'none';
     if (isMainViewVisible) {
@@ -231,28 +267,36 @@ viewByLetterToggle.addEventListener('click', () => {
     }
 });
 
-// The back button inside the index view should also go back
 backToMainViewBtn.addEventListener('click', () => {
     history.back();
 });
 
-// Listen for browser back/forward button clicks
 window.addEventListener('popstate', (event) => {
     if (!event.state || event.state.view === 'trap') {
-        // If the trap state or no state, always show main view and reset trap state
         showMainView();
+        hideLetterHeader();
+        currentLetter = null;
         history.replaceState({ view: 'trap' }, '', window.location.pathname);
     } else if (event.state.view === 'main') {
         showMainView();
+        hideLetterHeader();
+        currentLetter = null;
     } else if (event.state.view === 'index') {
         showIndexView();
+    } else if (event.state.view === 'letter') {
+        showMainView();
+        currentLetter = event.state.letter;
+        showLetterHeader(currentLetter);
+        filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === currentLetter);
+        currentSearchTerm = '';
+        container.innerHTML = '';
+        currentIndex = 0;
+        renderNextBatch();
     }
 });
 
-
 // --- Initialize App ---
 function initApp() {
-    // Set the initial history state to 'trap' so first back never kills SPA
     if (!history.state || history.state.view !== 'trap') {
         history.replaceState({ view: 'trap' }, '', window.location.pathname);
     }
@@ -269,15 +313,26 @@ function initApp() {
             allEntries = Object.entries(data).sort(limbuSort);
             filteredEntries = allEntries;
             initialLoading.style.display = 'none';
-            
-            // Show the correct view on initial load based on URL hash
-            if (window.location.hash === '#index') {
+
+            if (window.location.hash.startsWith('#letter-')) {
+                const hashLetter = decodeURIComponent(window.location.hash.replace('#letter-', ''));
+                history.replaceState({ view: 'letter', letter: hashLetter }, '', window.location.hash);
+                showMainView();
+                currentLetter = hashLetter;
+                showLetterHeader(hashLetter);
+                filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === hashLetter);
+                currentSearchTerm = '';
+                container.innerHTML = '';
+                currentIndex = 0;
+                renderNextBatch();
+            } else if (window.location.hash === '#index') {
                 showIndexView();
             } else {
                 showMainView();
+                hideLetterHeader();
             }
-            
-            renderNextBatch(); // Initial render
+
+            renderNextBatch();
         })
         .catch(err => {
             console.error(err);

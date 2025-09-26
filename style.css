@@ -183,7 +183,7 @@ h1 {
 .loading-message {
     text-align: center;
     padding: 20px;
-    font-size: 1.1em;
+    font-s-ize: 1.1em;
     color: var(--secondary-color);
 }
 
@@ -236,6 +236,21 @@ body.dark-mode .letter-group-card:hover {
 
 /* --- Responsive Adjustments --- */
 @media screen and (max-width: 600px) {
+
+    /* --- FIX: Reduce side padding on mobile --- */
+    body {
+        padding: 15px 10px;
+    }
+    
+    /* --- FIX: Reduce header font size and margin on mobile --- */
+    h1 {
+        font-size: 1.9em; 
+    }
+    
+    header {
+        margin-bottom: 20px;
+    }
+
     .entry-header {
         flex-direction: row;
         flex-wrap: wrap;

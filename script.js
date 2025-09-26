@@ -1,6 +1,5 @@
 // --- Limbu Dictionary SPA Enhancement ---
 // Show selected Limbu letter at top when filtering by letter
-// Ensure back button returns to letter index, not main view or kills SPA
 
 const CDN_URL = 'https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@refs/heads/main/data.json';
 
@@ -14,9 +13,8 @@ const initialLoading = document.getElementById('initial-loading');
 const searchInput = document.getElementById('search-input');
 const darkModeToggle = document.getElementById('dark-mode-toggle');
 const viewByLetterToggle = document.getElementById('view-by-letter-toggle');
-const backToMainViewBtn = document.getElementById('back-to-main-view');
 
-// --- New: Selected Letter Header ---
+// --- Selected Letter Header ---
 let selectedLetterHeader = document.getElementById('selected-letter-header');
 if (!selectedLetterHeader) {
     selectedLetterHeader = document.createElement('div');
@@ -33,12 +31,8 @@ function showLetterHeader(letter) {
     selectedLetterHeader.innerHTML = `
         <div class="letter-header" style="display:flex;align-items:center;gap:1em;font-size:2em;">
             <span class="selected-limbu-letter" style="font-size:2.5em;font-weight:bold;">${letter}</span>
-            <button id="back-to-index-btn" title="Back" style="background:none;border:none;font-size:1.5em;cursor:pointer;"><i class="bx bx-arrow-back"></i></button>
         </div>
     `;
-    document.getElementById('back-to-index-btn').onclick = function() {
-        history.back();
-    };
 }
 
 function hideLetterHeader() {
@@ -186,7 +180,6 @@ function applyFilter(term) {
     window.addEventListener('scroll', handleScroll);
     renderNextBatch();
 
-    // If filtering by search, hide letter header
     hideLetterHeader();
     currentLetter = null;
 }
@@ -237,8 +230,7 @@ function populateLetterIndex(letters) {
     });
 }
 
-// --- HISTORY API & VIEW MANAGEMENT (ENHANCED) ---
-
+// --- HISTORY API & VIEW MANAGEMENT ---
 function showMainView() {
     mainView.style.display = 'block';
     letterIndexView.style.display = 'none';
@@ -265,10 +257,6 @@ viewByLetterToggle.addEventListener('click', () => {
     } else {
         history.back();
     }
-});
-
-backToMainViewBtn.addEventListener('click', () => {
-    history.back();
 });
 
 window.addEventListener('popstate', (event) => {

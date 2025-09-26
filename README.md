@@ -4,6 +4,12 @@ A modern, web-based **Limbu Dictionary** displaying Limbu words, meanings, and t
 
 ---
 
+## 🔗 Live Demo
+
+You can view the live dictionary here: https://ingsha09.github.io/Limbu-Dictionary/
+
+---
+
 ## 📦 Features
 
 -   Full Limbu dictionary with English and Nepali meanings.

@@ -29,8 +29,8 @@ let currentLetter = null; // Tracks currently selected letter
 function showLetterHeader(letter) {
     selectedLetterHeader.style.display = 'block';
     selectedLetterHeader.innerHTML = `
-        <div class="letter-header" style="display:flex;align-items:center;gap:1em;font-size:2em;">
-            <span class="selected-limbu-letter" style="font-size:2.5em;font-weight:bold;">${letter}</span>
+        <div class="letter-header">
+            <span class="selected-limbu-letter">${letter}</span>
         </div>
     `;
 }
@@ -317,10 +317,9 @@ function initApp() {
                 showIndexView();
             } else {
                 showMainView();
-                hideLetterHeader();
+                renderNextBatch();
             }
 
-            renderNextBatch();
         })
         .catch(err => {
             console.error(err);

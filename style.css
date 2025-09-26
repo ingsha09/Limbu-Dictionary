@@ -28,12 +28,16 @@ body.dark-mode {
 
 /* --- General Styles --- */
 body {
-    padding: 20px;
     background-color: var(--bg-color);
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
     line-height: 1.6;
     font-family: 'Poppins', Arial, sans-serif;
+    
+    /* Centering content on larger screens */
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
 header {
@@ -55,6 +59,7 @@ h1 {
     font-size: 2.2em;
     font-weight: 700;
     margin: 0;
+    line-height: 1.2;
 }
 
 /* --- Controls & Icons --- */
@@ -83,7 +88,7 @@ h1 {
 }
 
 #controls {
-    margin-bottom: 30px;
+    margin-bottom: 20px; /* Reduced margin */
 }
 
 .search-container {
@@ -135,6 +140,7 @@ h1 {
 .limbu-word { 
     font-size: 1.6em; 
     color: var(--primary-color);
+    font-family: 'Noto Sans Limbu', sans-serif;
 }
 
 .secondary-info {
@@ -183,7 +189,7 @@ h1 {
 .loading-message {
     text-align: center;
     padding: 20px;
-    font-s-ize: 1.1em;
+    font-size: 1.1em;
     color: var(--secondary-color);
 }
 
@@ -237,19 +243,25 @@ body.dark-mode .letter-group-card:hover {
 /* --- Responsive Adjustments --- */
 @media screen and (max-width: 600px) {
 
-    /* --- FIX: Reduce side padding on mobile --- */
+    /* --- MORE AGGRESSIVE FIXES FOR MOBILE --- */
     body {
-        padding: 15px 10px;
+        /* Reduce side padding significantly */
+        padding: 15px 12px;
     }
     
-    /* --- FIX: Reduce header font size and margin on mobile --- */
     h1 {
-        font-size: 1.9em; 
+        /* Make the header title much smaller */
+        font-size: 1.75em; 
     }
     
     header {
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
+    
+    #controls {
+        margin-bottom: 15px;
+    }
+    /* --- END OF FIXES --- */
 
     .entry-header {
         flex-direction: row;

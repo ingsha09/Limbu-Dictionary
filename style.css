@@ -77,27 +77,9 @@ h1 {
 /* --- Controls & Icons --- */
 #dark-mode-toggle,
 #view-by-letter-toggle,
-#back-to-main-view {
-    background: none;
-    border: none;
-    color: var(--secondary-color);
-    font-size: 1.5em; 
-    width: 44px; 
-    height: 44px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s, background-color 0.2s;
-}
-
 #dark-mode-toggle:hover,
 #view-by-letter-toggle:hover,
-#back-to-main-view:hover {
-    color: var(--primary-color);
-    background-color: rgba(125, 77, 115, 0.1);
-}
+
 
 #controls {
     margin-bottom: 20px; /* Reduced margin */

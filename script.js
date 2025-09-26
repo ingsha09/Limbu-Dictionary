@@ -187,7 +187,6 @@ function populateLetterIndex(letters) {
         card.className = 'letter-group-card';
         card.textContent = letter;
         card.addEventListener('click', () => {
-            // When a letter is clicked, go back to the main view and filter
             history.back(); // This will trigger the popstate event to show the main view
             
             // We need a slight delay for the view to switch before filtering
@@ -225,11 +224,9 @@ function showIndexView() {
 viewByLetterToggle.addEventListener('click', () => {
     const isMainViewVisible = mainView.style.display !== 'none';
     if (isMainViewVisible) {
-        // From main to index: push a new state
         history.pushState({ view: 'index' }, '', '#index');
         showIndexView();
     } else {
-        // From index to main: go back in history
         history.back();
     }
 });
@@ -241,8 +238,11 @@ backToMainViewBtn.addEventListener('click', () => {
 
 // Listen for browser back/forward button clicks
 window.addEventListener('popstate', (event) => {
-    // If the state is null, it means we're at the initial page load state
-    if (!event.state || event.state.view === 'main') {
+    if (!event.state || event.state.view === 'trap') {
+        // If the trap state or no state, always show main view and reset trap state
+        showMainView();
+        history.replaceState({ view: 'trap' }, '', window.location.pathname);
+    } else if (event.state.view === 'main') {
         showMainView();
     } else if (event.state.view === 'index') {
         showIndexView();
@@ -252,8 +252,10 @@ window.addEventListener('popstate', (event) => {
 
 // --- Initialize App ---
 function initApp() {
-    // Set the initial history state to 'main'
-    history.replaceState({ view: 'main' }, '', window.location.pathname);
+    // Set the initial history state to 'trap' so first back never kills SPA
+    if (!history.state || history.state.view !== 'trap') {
+        history.replaceState({ view: 'trap' }, '', window.location.pathname);
+    }
 
     if (localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-mode');

@@ -97,33 +97,26 @@ function renderEntry(entryTuple, term) {
     const [key, entry] = entryTuple;
     const entryDiv = document.createElement('div');
     entryDiv.className = 'dictionary-entry';
-
     const limbuWordText = fixStandaloneLimbu(entry.dId || 'Word Missing');
     const secondaryInfoText = entry.desc || '';
     const meaningText = cleanMeaningText(entry);
-
     const highlightedLimbu = highlightText(limbuWordText, term);
     const highlightedSecondary = highlightText(secondaryInfoText, term);
     const highlightedMeaning = highlightText(meaningText, term);
-
     let headerHTML = `<span class="limbu-word" lang="lif">${highlightedLimbu}</span>`;
     if (secondaryInfoText) {
         headerHTML += `<span class="secondary-info">${highlightedSecondary}</span>`;
         headerHTML += `<button class="tts-btn" data-text="${secondaryInfoText}" title="Listen"><i class="bx bx-volume-full"></i></button>`;
     }
-
     entryDiv.innerHTML = `
         <div class="entry-header">${headerHTML}</div>
         <div class="meaning-text">${highlightedMeaning}</div>
     `;
-
     container.appendChild(entryDiv);
-
     const limbuWordEl = entryDiv.querySelector('.limbu-word');
     if (limbuWordEl) {
         setTimeout(() => { limbuWordEl.style.letterSpacing = '0.01px'; }, 1);
     }
-
     const ttsBtn = entryDiv.querySelector('.tts-btn');
     if (ttsBtn) ttsBtn.addEventListener('click', () => speakNepali(ttsBtn.dataset.text));
 }
@@ -150,13 +143,11 @@ function renderNextBatch() {
     const end = Math.min(currentIndex + BATCH_SIZE, filteredEntries.length);
     loadingIndicator.style.display = 'block';
     loadingIndicator.innerHTML = '<i class="bx bx-loader bx-spin"></i> Loading more entries...';
-
     for (let i = start; i < end; i++) {
         renderEntry(filteredEntries[i], originalSearchTerm);
     }
     currentIndex = end;
     isLoading = false;
-
     loadingIndicator.textContent = currentIndex < filteredEntries.length ? `Scroll down to load more... (${currentIndex}/${filteredEntries.length})` : `End of list. Total entries: ${filteredEntries.length}`;
 }
 
@@ -175,9 +166,7 @@ searchInput.addEventListener('input', () => {
 function applyFilter(term) {
     originalSearchTerm = term.trim().normalize('NFC');
     currentSearchTerm = normalizeForSearch(originalSearchTerm);
-
     window.removeEventListener('scroll', handleScroll);
-
     if (!currentSearchTerm) {
         filteredEntries = allEntries;
     } else {
@@ -185,14 +174,12 @@ function applyFilter(term) {
             const text = [entry.dId, entry.desc, entry.mean, entry.group].map(normalizeForSearch).join(' ');
             return text.includes(currentSearchTerm);
         });
-
         const searchTerm = originalSearchTerm;
         filteredEntries.sort((a, b) => {
             const entryA = a[1];
             const entryB = b[1];
             const dIdA = entryA.dId || '';
             const dIdB = entryB.dId || '';
-
             let scoreA = 10;
             if (dIdA === searchTerm) {
                 scoreA = 1;
@@ -201,7 +188,6 @@ function applyFilter(term) {
             } else {
                 scoreA = 3;
             }
-
             let scoreB = 10;
             if (dIdB === searchTerm) {
                 scoreB = 1;
@@ -210,16 +196,13 @@ function applyFilter(term) {
             } else {
                 scoreB = 3;
             }
-            
             return scoreA - scoreB;
         });
     }
-
     container.innerHTML = '';
     currentIndex = 0;
     window.addEventListener('scroll', handleScroll);
     renderNextBatch();
-
     hideLetterHeader();
     currentLetter = null;
 }
@@ -243,7 +226,6 @@ darkModeToggle.addEventListener('click', toggleDarkMode);
 
 // --- Scroll to Top Functionality ---
 const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
-
 window.addEventListener('scroll', () => {
     if (window.scrollY > 400) {
         scrollToTopBtn.classList.add('show');
@@ -251,7 +233,6 @@ window.addEventListener('scroll', () => {
         scrollToTopBtn.classList.remove('show');
     }
 });
-
 scrollToTopBtn.addEventListener('click', () => {
     window.scrollTo({
         top: 0,
@@ -261,9 +242,7 @@ scrollToTopBtn.addEventListener('click', () => {
 
 // --- Extract Letters & Populate Index ---
 function extractUniqueLetters() {
-    const letters = allEntries
-        .map(([k, e]) => fixStandaloneLimbu(e.dId || '')[0])
-        .filter(ch => limbuAlphabet.includes(ch));
+    const letters = allEntries.map(([k, e]) => fixStandaloneLimbu(e.dId || '')[0]).filter(ch => limbuAlphabet.includes(ch));
     return [...new Set(letters)].sort((a, b) => limbuAlphabet.indexOf(a) - limbuAlphabet.indexOf(b));
 }
 
@@ -280,8 +259,10 @@ function populateLetterIndex(letters) {
             currentLetter = letter;
             showLetterHeader(letter);
             filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === letter);
-            originalSearchTerm = ''; currentSearchTerm = '';
-            container.innerHTML = ''; currentIndex = 0;
+            originalSearchTerm = '';
+            currentSearchTerm = '';
+            container.innerHTML = '';
+            currentIndex = 0;
             renderNextBatch();
         });
         letterList.appendChild(card);
@@ -317,30 +298,49 @@ viewByLetterToggle.addEventListener('click', () => {
     }
 });
 
+// --- THIS IS THE CORRECTED SECTION ---
 window.addEventListener('popstate', (event) => {
-    if (!event.state || event.state.view === 'trap') {
-        showMainView(); hideLetterHeader(); currentLetter = null;
-        history.replaceState({ view: 'trap' }, '', window.location.pathname);
-    } else if (event.state.view === 'main') {
-        showMainView(); hideLetterHeader(); currentLetter = null;
+    // If there's no state, or we're going back to the initial "main" state
+    if (!event.state || event.state.view === 'main') {
+        showMainView();
+        hideLetterHeader();
+        currentLetter = null;
+
+        // Reset the search and filter state completely
+        searchInput.value = '';
+        originalSearchTerm = '';
+        currentSearchTerm = '';
+        filteredEntries = allEntries;
+
+        // Re-render the full list from the start
+        container.innerHTML = '';
+        currentIndex = 0;
+        renderNextBatch();
+
+        // Ensure the base URL is clean without a hash
+        history.replaceState({ view: 'main' }, '', window.location.pathname);
     } else if (event.state.view === 'index') {
         showIndexView();
     } else if (event.state.view === 'letter') {
         showMainView();
         currentLetter = event.state.letter;
         showLetterHeader(currentLetter);
+
+        // Filter and render for that specific letter
         filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === currentLetter);
-        originalSearchTerm = ''; currentSearchTerm = '';
-        container.innerHTML = ''; currentIndex = 0;
+        originalSearchTerm = '';
+        currentSearchTerm = '';
+        container.innerHTML = '';
+        currentIndex = 0;
         renderNextBatch();
     }
 });
 
 // --- Initialize App ---
 function initApp() {
-    if (!history.state || history.state.view !== 'trap') {
-        history.replaceState({ view: 'trap' }, '', window.location.pathname);
-    }
+    // --- THIS SECTION IS CLEANED UP ---
+    // Establish a clean 'main' state at the very beginning.
+    history.replaceState({ view: 'main' }, '', window.location.pathname);
 
     if (localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-mode');
@@ -348,7 +348,7 @@ function initApp() {
         darkModeToggle.querySelector('i').classList.remove('bx-moon');
     }
 
-    // 🚀 Fetch with cache-busting
+    // Use cache-busting for the data file to ensure freshness
     fetch(`${CDN_URL}?t=${Date.now()}`)
         .then(res => res.ok ? res.json() : Promise.reject(`HTTP ${res.status}`))
         .then(data => {
@@ -361,11 +361,11 @@ function initApp() {
                 };
                 return [key, normalizedEntry];
             });
-            
             allEntries = normalizedData.sort(limbuSort);
             filteredEntries = allEntries;
             initialLoading.style.display = 'none';
 
+            // Handle loading directly into a specific view from the URL
             if (window.location.hash.startsWith('#letter-')) {
                 const hashLetter = decodeURIComponent(window.location.hash.replace('#letter-', ''));
                 history.replaceState({ view: 'letter', letter: hashLetter }, '', window.location.hash);
@@ -373,10 +373,11 @@ function initApp() {
                 currentLetter = hashLetter;
                 showLetterHeader(hashLetter);
                 filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === hashLetter);
-                originalSearchTerm = ''; currentSearchTerm = '';
-                container.innerHTML = ''; currentIndex = 0;
+                container.innerHTML = '';
+                currentIndex = 0;
                 renderNextBatch();
             } else if (window.location.hash === '#index') {
+                history.replaceState({ view: 'index' }, '', '#index');
                 showIndexView();
             } else {
                 showMainView();

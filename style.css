@@ -1,3 +1,12 @@
+/* --- Local Font Definition --- */
+@font-face {
+  font-family: 'Noto Sans Limbu';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap; /* A best practice for performance */
+  src: url('fonts/NotoSansLimbu.woff2') format('woff2'); /* Loads the local font file */
+}
+
 /* --- Root Variables for Theming --- */
 :root {
     --bg-color: #f8f8f8;
@@ -34,6 +43,7 @@ body {
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
     line-height: 1.6;
+    font-family: 'Poppins', Arial, sans-serif;
     max-width: 900px;
     margin: 0 auto;
     padding: 20px;

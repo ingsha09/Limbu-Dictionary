@@ -34,7 +34,6 @@ body {
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
     line-height: 1.6;
-    font-family: 'Poppins', Arial, sans-serif;
     max-width: 900px;
     margin: 0 auto;
     padding: 20px;
@@ -156,6 +155,7 @@ h1 {
 .limbu-word { 
     font-size: 1.6em; 
     color: var(--primary-color);
+    font-family: 'Noto Sans Limbu', sans-serif;
 }
 
 .secondary-info {

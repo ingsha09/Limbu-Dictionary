@@ -1,5 +1,4 @@
-// --- Limbu Dictionary SPA Enhancement ---
-// Show selected Limbu letter at top when filtering by letter
+// --- Limbu Dictionary SPA ---
 
 const CDN_URL = 'https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@refs/heads/main/data.json';
 
@@ -24,15 +23,11 @@ if (!selectedLetterHeader) {
     mainView.insertBefore(selectedLetterHeader, container);
 }
 
-let currentLetter = null; // Tracks currently selected letter
+let currentLetter = null;
 
 function showLetterHeader(letter) {
     selectedLetterHeader.style.display = 'block';
-    selectedLetterHeader.innerHTML = `
-        <div class="letter-header">
-            <span class="selected-limbu-letter" lang="lif">${letter}</span>
-        </div>
-    `;
+    selectedLetterHeader.innerHTML = `<div class="letter-header"><span class="selected-limbu-letter" lang="lif">${letter}</span></div>`;
 }
 
 function hideLetterHeader() {
@@ -40,12 +35,8 @@ function hideLetterHeader() {
     selectedLetterHeader.innerHTML = '';
 }
 
-// --- Limbu Alphabet & Combining ---
-const limbuAlphabet = [
-    'ᤀ', 'ᤁ', 'ᤂ', 'ᤃ', 'ᤄ', 'ᤅ', 'ᤆ', 'ᤇ', 'ᤈ', 'ᤉ', 'ᤊ', 'ᤋ', 'ᤌ', 'ᤍ',
-    'ᤎ', 'ᤏ', 'ᤐ', 'ᤑ', 'ᤒ', 'ᤓ', 'ᤔ', 'ᤕ', 'ᤖ', 'ᤗ', 'ᤘ', 'ᤙ', 'ᤚ', 'ᤛ', 'ᤜ'
-];
-const limbuCombining = /[\u1920-\u193F]/;
+// --- Limbu Alphabet ---
+const limbuAlphabet = ['ᤀ', 'ᤁ', 'ᤂ', 'ᤃ', 'ᤄ', 'ᤅ', 'ᤆ', 'ᤇ', 'ᤈ', 'ᤉ', 'ᤊ', 'ᤋ', 'ᤌ', 'ᤍ', 'ᤎ', 'ᤏ', 'ᤐ', 'ᤑ', 'ᤒ', 'ᤓ', 'ᤔ', 'ᤕ', 'ᤖ', 'ᤗ', 'ᤘ', 'ᤙ', 'ᤚ', 'ᤛ', 'ᤜ'];
 
 // --- App State ---
 let allEntries = [];
@@ -53,6 +44,7 @@ let filteredEntries = [];
 let currentIndex = 0;
 const BATCH_SIZE = 100;
 let currentSearchTerm = '';
+let originalSearchTerm = '';
 let isLoading = false;
 
 // --- Utilities ---
@@ -67,7 +59,7 @@ function normalizeForSearch(text) {
 }
 
 function limbuSort(a, b) {
-    const getFirstChar = (str) => {
+    const getFirstChar = str => {
         if (!str) return null;
         for (let i = 0; i < str.length; i++) {
             if (limbuAlphabet.includes(str[i])) return str[i];
@@ -87,42 +79,49 @@ function cleanMeaningText(entry) {
     return cleaned.replace(/^[,\.\/\|]/, '').trim();
 }
 
-function createHeaderLine(entry) {
-    const primaryWords = (entry.dId || 'Word Missing');
-    const correctedText = fixStandaloneLimbu(primaryWords);
-    const secondaryInfo = entry.desc || '';
-    let header = `<span class="limbu-word" lang="lif">${correctedText}</span>`;
-    if (secondaryInfo) {
-        header += `<span class="secondary-info">${secondaryInfo}</span>`;
-        header += `<button class="tts-btn" data-text="${secondaryInfo}" title="Listen"><i class="bx bx-volume-full"></i></button>`;
-    }
-    return header;
-}
-
 function highlightText(text, term) {
-    if (!term || term.length < 2) return text;
-    const regex = new RegExp(`(${term})(?![^<]*>|[^<>]*<\/span>)`, 'gi');
-    return text.replace(regex, '<span class="highlight">$1</span>');
+    if (!term || !text) {
+        return text || '';
+    }
+    const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (escapedTerm === '') {
+        return text;
+    }
+    const hasLatinChars = /[a-zA-Z]/.test(escapedTerm);
+    const flags = hasLatinChars ? 'gi' : 'g';
+    const regex = new RegExp(escapedTerm, flags);
+    return text.replace(regex, `<span class="highlight">$&</span>`);
 }
 
-// --- Render Entry ---
 function renderEntry(entryTuple, term) {
     const [key, entry] = entryTuple;
     const entryDiv = document.createElement('div');
     entryDiv.className = 'dictionary-entry';
+
+    const limbuWordText = fixStandaloneLimbu(entry.dId || 'Word Missing');
+    const secondaryInfoText = entry.desc || '';
+    const meaningText = cleanMeaningText(entry);
+
+    const highlightedLimbu = highlightText(limbuWordText, term);
+    const highlightedSecondary = highlightText(secondaryInfoText, term);
+    const highlightedMeaning = highlightText(meaningText, term);
+
+    let headerHTML = `<span class="limbu-word" lang="lif">${highlightedLimbu}</span>`;
+    if (secondaryInfoText) {
+        headerHTML += `<span class="secondary-info">${highlightedSecondary}</span>`;
+        headerHTML += `<button class="tts-btn" data-text="${secondaryInfoText}" title="Listen"><i class="bx bx-volume-full"></i></button>`;
+    }
+
     entryDiv.innerHTML = `
-        <div class="entry-header">${highlightText(createHeaderLine(entry), term)}</div>
-        <div class="meaning-text">${highlightText(cleanMeaningText(entry), term)}</div>
+        <div class="entry-header">${headerHTML}</div>
+        <div class="meaning-text">${highlightedMeaning}</div>
     `;
+
     container.appendChild(entryDiv);
 
-    // *** THE DEFINITIVE FIX ***
-    // This forces the browser to repaint the element, fixing complex script rendering bugs.
     const limbuWordEl = entryDiv.querySelector('.limbu-word');
     if (limbuWordEl) {
-        setTimeout(() => {
-            limbuWordEl.style.letterSpacing = '0.01px';
-        }, 1);
+        setTimeout(() => { limbuWordEl.style.letterSpacing = '0.01px'; }, 1);
     }
 
     const ttsBtn = entryDiv.querySelector('.tts-btn');
@@ -143,8 +142,7 @@ function speakNepali(text) {
 // --- Render Next Batch ---
 function renderNextBatch() {
     if (currentIndex >= filteredEntries.length || isLoading) {
-        loadingIndicator.textContent = currentIndex >= filteredEntries.length ?
-            `End of list. Total entries: ${filteredEntries.length}` : '';
+        loadingIndicator.textContent = currentIndex >= filteredEntries.length ? `End of list. Total entries: ${filteredEntries.length}` : '';
         return;
     }
     isLoading = true;
@@ -153,13 +151,13 @@ function renderNextBatch() {
     loadingIndicator.style.display = 'block';
     loadingIndicator.innerHTML = '<i class="bx bx-loader bx-spin"></i> Loading more entries...';
 
-    for (let i = start; i < end; i++) renderEntry(filteredEntries[i], currentSearchTerm);
+    for (let i = start; i < end; i++) {
+        renderEntry(filteredEntries[i], originalSearchTerm);
+    }
     currentIndex = end;
     isLoading = false;
 
-    loadingIndicator.textContent = currentIndex < filteredEntries.length ?
-        `Scroll down to load more... (${currentIndex}/${filteredEntries.length})` :
-        `End of list. Total entries: ${filteredEntries.length}`;
+    loadingIndicator.textContent = currentIndex < filteredEntries.length ? `Scroll down to load more... (${currentIndex}/${filteredEntries.length})` : `End of list. Total entries: ${filteredEntries.length}`;
 }
 
 // --- Search & Filter ---
@@ -175,14 +173,19 @@ searchInput.addEventListener('input', () => {
 });
 
 function applyFilter(term) {
-    currentSearchTerm = normalizeForSearch(term.trim());
+    originalSearchTerm = term.trim().normalize('NFC');
+    currentSearchTerm = normalizeForSearch(originalSearchTerm);
+
     window.removeEventListener('scroll', handleScroll);
 
-    if (currentSearchTerm.length < 2) filteredEntries = allEntries;
-    else filteredEntries = allEntries.filter(([key, entry]) => {
-        const text = [entry.dId, entry.desc, entry.mean, entry.group].map(normalizeForSearch).join(' ');
-        return text.includes(currentSearchTerm);
-    });
+    if (!currentSearchTerm) {
+        filteredEntries = allEntries;
+    } else {
+        filteredEntries = allEntries.filter(([key, entry]) => {
+            const text = [entry.dId, entry.desc, entry.mean, entry.group].map(normalizeForSearch).join(' ');
+            return text.includes(currentSearchTerm);
+        });
+    }
 
     container.innerHTML = '';
     currentIndex = 0;
@@ -210,6 +213,24 @@ function toggleDarkMode() {
 }
 darkModeToggle.addEventListener('click', toggleDarkMode);
 
+// --- Scroll to Top Functionality ---
+const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
+
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 400) {
+        scrollToTopBtn.classList.add('show');
+    } else {
+        scrollToTopBtn.classList.remove('show');
+    }
+});
+
+scrollToTopBtn.addEventListener('click', () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+});
+
 // --- Extract Letters & Populate Index ---
 function extractUniqueLetters() {
     const letters = allEntries
@@ -231,9 +252,8 @@ function populateLetterIndex(letters) {
             currentLetter = letter;
             showLetterHeader(letter);
             filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === letter);
-            currentSearchTerm = '';
-            container.innerHTML = '';
-            currentIndex = 0;
+            originalSearchTerm = ''; currentSearchTerm = '';
+            container.innerHTML = ''; currentIndex = 0;
             renderNextBatch();
         });
         letterList.appendChild(card);
@@ -271,14 +291,10 @@ viewByLetterToggle.addEventListener('click', () => {
 
 window.addEventListener('popstate', (event) => {
     if (!event.state || event.state.view === 'trap') {
-        showMainView();
-        hideLetterHeader();
-        currentLetter = null;
+        showMainView(); hideLetterHeader(); currentLetter = null;
         history.replaceState({ view: 'trap' }, '', window.location.pathname);
     } else if (event.state.view === 'main') {
-        showMainView();
-        hideLetterHeader();
-        currentLetter = null;
+        showMainView(); hideLetterHeader(); currentLetter = null;
     } else if (event.state.view === 'index') {
         showIndexView();
     } else if (event.state.view === 'letter') {
@@ -286,9 +302,8 @@ window.addEventListener('popstate', (event) => {
         currentLetter = event.state.letter;
         showLetterHeader(currentLetter);
         filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === currentLetter);
-        currentSearchTerm = '';
-        container.innerHTML = '';
-        currentIndex = 0;
+        originalSearchTerm = ''; currentSearchTerm = '';
+        container.innerHTML = ''; currentIndex = 0;
         renderNextBatch();
     }
 });
@@ -308,7 +323,17 @@ function initApp() {
     fetch(CDN_URL)
         .then(res => res.ok ? res.json() : Promise.reject(`HTTP ${res.status}`))
         .then(data => {
-            allEntries = Object.entries(data).sort(limbuSort);
+            const normalizedData = Object.entries(data).map(([key, entry]) => {
+                const normalizedEntry = {
+                    dId: entry.dId ? entry.dId.normalize('NFC') : '',
+                    desc: entry.desc ? entry.desc.normalize('NFC') : '',
+                    mean: entry.mean ? entry.mean.normalize('NFC') : '',
+                    group: entry.group ? entry.group.normalize('NFC') : ''
+                };
+                return [key, normalizedEntry];
+            });
+            
+            allEntries = normalizedData.sort(limbuSort);
             filteredEntries = allEntries;
             initialLoading.style.display = 'none';
 
@@ -319,9 +344,8 @@ function initApp() {
                 currentLetter = hashLetter;
                 showLetterHeader(hashLetter);
                 filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === hashLetter);
-                currentSearchTerm = '';
-                container.innerHTML = '';
-                currentIndex = 0;
+                originalSearchTerm = ''; currentSearchTerm = '';
+                container.innerHTML = ''; currentIndex = 0;
                 renderNextBatch();
             } else if (window.location.hash === '#index') {
                 showIndexView();
@@ -329,7 +353,6 @@ function initApp() {
                 showMainView();
                 renderNextBatch();
             }
-
         })
         .catch(err => {
             console.error(err);

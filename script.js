@@ -172,6 +172,8 @@ searchInput.addEventListener('input', () => {
     }, 300);
 });
 
+// --- script.js ---
+
 function applyFilter(term) {
     originalSearchTerm = term.trim().normalize('NFC');
     currentSearchTerm = normalizeForSearch(originalSearchTerm);
@@ -181,9 +183,43 @@ function applyFilter(term) {
     if (!currentSearchTerm) {
         filteredEntries = allEntries;
     } else {
+        // 1. First, filter the entries as before
         filteredEntries = allEntries.filter(([key, entry]) => {
             const text = [entry.dId, entry.desc, entry.mean, entry.group].map(normalizeForSearch).join(' ');
             return text.includes(currentSearchTerm);
+        });
+
+        // 2. NEW: Sort the filtered results by relevance
+        const searchTerm = originalSearchTerm; // Use the user's original input for matching
+        
+        filteredEntries.sort((a, b) => {
+            const entryA = a[1];
+            const entryB = b[1];
+            const dIdA = entryA.dId || '';
+            const dIdB = entryB.dId || '';
+
+            // Assign a relevance score to each entry (lower is better)
+            let scoreA = 10;
+            if (dIdA === searchTerm) {
+                scoreA = 1; // Exact match = Highest priority
+            } else if (dIdA.startsWith(searchTerm)) {
+                scoreA = 2; // Starts with = Second priority
+            } else {
+                scoreA = 3; // Contains = Third priority
+            }
+
+            let scoreB = 10;
+            if (dIdB === searchTerm) {
+                scoreB = 1;
+            } else if (dIdB.startsWith(searchTerm)) {
+                scoreB = 2;
+            } else {
+                scoreB = 3;
+            }
+            
+            // Return the difference in scores. If scores are the same,
+            // the original sort order is maintained, which is alphabetical.
+            return scoreA - scoreB;
         });
     }
 

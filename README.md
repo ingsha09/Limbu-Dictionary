@@ -8,53 +8,56 @@ A modern, web-based **Limbu Dictionary** displaying Limbu words, meanings, and t
 
 ## 🔗 Live Demo
 
-You can view the live dictionary here: https://ingsha09.github.io/Limbu-Dictionary/
+You can view the live dictionary here:  
+👉 https://ingsha09.github.io/Limbu-Dictionary/
 
 ---
 
 ## 📦 Features
 
--   Full Limbu dictionary with English and Nepali meanings.
--   Search by Limbu, English, or Nepali text.
--   Browse by Limbu letters (index view).
--   Lazy-loading for performance on large datasets.
--   Dark mode toggle.
--   Text-to-Speech (TTS) for Nepali/English meanings.
--   Fully responsive design.
+- Full Limbu dictionary with English and Nepali meanings.  
+- Search by Limbu, English, or Nepali text.  
+- Browse by Limbu letters (index view).  
+- Lazy-loading for performance on large datasets.  
+- Dark mode toggle.  
+- Text-to-Speech (TTS) for Nepali/English meanings.  
+- Fully responsive design.  
 
 ---
+
+## 🌍 Public API
 
 The dictionary data is publicly accessible through a JSON API, allowing developers to integrate this valuable lexical resource into their own applications.
 
 ---
 
-## How to Use the API and Fetch Data
-
+## 📡 How to Use the API and Fetch Data
 
 You can access the entire Limbu dictionary dataset through a single API endpoint. The data is provided in a straightforward JSON format, making it easy to parse and use in any programming language.
 
-**API Endpoint**
+### API Endpoint
 
-The public URL for the dictionary's JSON data is:
-
-```
 https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@main/data.json
-```
 
-To always get the latest version and bypass jsDelivr cache, you can append a timestamp query parameter:
+### 🔄 Cache-Busting (Always Get Latest Data)
 
-```
+Since jsDelivr caches files, sometimes updates may not appear immediately. To bypass cache and always fetch the latest version, append a **timestamp query parameter**:
+
 https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@main/data.json?t=12345
-```
 
-**Data Structure**
+Or in JavaScript, use `Date.now()` to auto-refresh:
+
+```js
+const API_URL = 'https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@main/data.json?t=' + Date.now();
+```
+---
+
+
+## 📂 Data Structure
 
 The JSON data is structured as an object where each key is a Limbu word.
 
-The value associated with each key is an object containing detailed information about that word.
-
-
-Here is a sample of the JSON structure:
+Each entry looks like this:
 
 ```
 {
@@ -73,14 +76,16 @@ Here is a sample of the JSON structure:
 }
 ```
 
--   *dId:* The Limbu word itself.
--   *desc:* An optional description or additional information about the word.
--   *mean:* The meaning of the word, typically in Nepali and/or English.
--   *group:* An optional category or grouping for the word.
+-   **dId** → The Limbu word itself.
+-   **desc** → Optional description or explanation.
+-   **mean** → Meaning in Nepali/English.
+-   **group** → Optional category/grouping.
 
-**Fetching Data with JavaScript**
+---
 
-You can easily *fetch* and use this data in a web application using the fetch API in JavaScript. The following example demonstrates how to retrieve the dictionary data and log it to the console.
+## ⚡ Fetching Data with JavaScript
+
+Here’s how you can use the dictionary API in your own projects:
 
 ```
 // API endpoint for the Limbu dictionary data (with cache-busting)
@@ -117,3 +122,13 @@ async function getLimbuDictionary() {
 // Call the function to fetch the data
 getLimbuDictionary();
 ```
+
+---
+
+## 🤝 Contributing
+
+If you’d like to contribute:
+
+1. Fork this repo.
+2. Edit or add new words in the data repo: https://github.com/ingsha09/limbu-dictionary-data
+3. Submit a pull request.

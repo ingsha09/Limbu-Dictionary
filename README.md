@@ -38,12 +38,20 @@ You can access the entire Limbu dictionary dataset through a single API endpoint
 The public URL for the dictionary's JSON data is:
 
 ```
-https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@refs/heads/main/data.json
+https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@main/data.json
+```
+
+To always get the latest version and bypass jsDelivr cache, you can append a timestamp query parameter:
+
+```
+https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@main/data.json?t=12345
 ```
 
 **Data Structure**
 
-The JSON data is structured as an object where each key is a Limbu word. The value associated with each key is an object containing detailed information about that word.
+The JSON data is structured as an object where each key is a Limbu word.
+
+The value associated with each key is an object containing detailed information about that word.
 
 
 Here is a sample of the JSON structure:
@@ -75,8 +83,8 @@ Here is a sample of the JSON structure:
 You can easily *fetch* and use this data in a web application using the fetch API in JavaScript. The following example demonstrates how to retrieve the dictionary data and log it to the console.
 
 ```
-// API endpoint for the Limbu dictionary data
-const API_URL = 'https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@refs/heads/main/data.json';
+// API endpoint for the Limbu dictionary data (with cache-busting)
+const API_URL = 'https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@main/data.json?t=' + Date.now();
 
 // Function to fetch and process the dictionary data
 async function getLimbuDictionary() {
@@ -95,8 +103,7 @@ async function getLimbuDictionary() {
     // Log the entire dictionary object
     console.log(data);
 
-    // You can now use the 'data' object in your application
-    // For example, to access the meaning of a specific word:
+    // Example: access the meaning of a specific word
     const word = 'ᤀᤁ';
     if (data[word]) {
       console.log(`The meaning of ${word} is: ${data[word].mean}`);

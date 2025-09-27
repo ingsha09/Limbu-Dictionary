@@ -337,8 +337,7 @@ window.addEventListener('popstate', (event) => {
 });
 
 // --- Initialize App ---
-function initApp() {
-    // --- THIS SECTION IS CLEANED UP ---
+async function initApp() {
     // Establish a clean 'main' state at the very beginning.
     history.replaceState({ view: 'main' }, '', window.location.pathname);
 
@@ -348,47 +347,89 @@ function initApp() {
         darkModeToggle.querySelector('i').classList.remove('bx-moon');
     }
 
-    // Use cache-busting for the data file to ensure freshness
-    fetch(`${CDN_URL}?t=${Date.now()}`)
-        .then(res => res.ok ? res.json() : Promise.reject(`HTTP ${res.status}`))
-        .then(data => {
-            const normalizedData = Object.entries(data).map(([key, entry]) => {
-                const normalizedEntry = {
-                    dId: entry.dId ? entry.dId.normalize('NFC') : '',
-                    desc: entry.desc ? entry.desc.normalize('NFC') : '',
-                    mean: entry.mean ? entry.mean.normalize('NFC') : '',
-                    group: entry.group ? entry.group.normalize('NFC') : ''
-                };
-                return [key, normalizedEntry];
-            });
-            allEntries = normalizedData.sort(limbuSort);
-            filteredEntries = allEntries;
-            initialLoading.style.display = 'none';
+    try {
+        // --- Add hidden status element ---
+        let statusEl = document.getElementById("data-status");
+        if (!statusEl) {
+            statusEl = document.createElement("div");
+            statusEl.id = "data-status";
+            statusEl.style.cssText = "display:none; font-size:12px; margin:8px 0; color:#888; text-align:center;";
+            document.body.insertBefore(statusEl, document.body.firstChild);
+        }
 
-            // Handle loading directly into a specific view from the URL
-            if (window.location.hash.startsWith('#letter-')) {
-                const hashLetter = decodeURIComponent(window.location.hash.replace('#letter-', ''));
-                history.replaceState({ view: 'letter', letter: hashLetter }, '', window.location.hash);
-                showMainView();
-                currentLetter = hashLetter;
-                showLetterHeader(hashLetter);
-                filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === hashLetter);
-                container.innerHTML = '';
-                currentIndex = 0;
-                renderNextBatch();
-            } else if (window.location.hash === '#index') {
-                history.replaceState({ view: 'index' }, '', '#index');
-                showIndexView();
-            } else {
-                showMainView();
-                renderNextBatch();
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            initialLoading.innerHTML = `<p class="error-message">Failed to load data: ${err}</p>`;
-            loadingIndicator.style.display = 'none';
+        // --- 1. Try fetching latest commit hash from GitHub API ---
+        let dataUrl;
+        try {
+            const commitRes = await fetch("https://api.github.com/repos/ingsha09/limbu-dictionary-data/commits/main");
+            if (!commitRes.ok) throw new Error(`GitHub API error: ${commitRes.status}`);
+            const commitData = await commitRes.json();
+            const commitHash = commitData.sha;
+
+            // Build immutable URL using commit hash
+            dataUrl = `https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@${commitHash}/data.json`;
+            console.log("✅ Using commit hash:", commitHash);
+
+            // Keep hidden since it's successful
+            statusEl.style.display = "none";
+        } catch (apiErr) {
+            console.warn("⚠️ GitHub API failed, falling back to @main", apiErr);
+
+            // Fallback: use @main with cache-busting timestamp
+            dataUrl = `https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@main/data.json?t=${Date.now()}`;
+            statusEl.textContent = "Dictionary loaded via fallback ⚠️ (@main + cache-bust)";
+            statusEl.style.color = "orange";
+            statusEl.style.display = "block";
+        }
+
+        // --- 2. Fetch dictionary data ---
+        const res = await fetch(dataUrl);
+        if (!res.ok) throw new Error(`Data fetch error: ${res.status}`);
+        const data = await res.json();
+
+        // --- 3. Normalize entries ---
+        const normalizedData = Object.entries(data).map(([key, entry]) => {
+            const normalizedEntry = {
+                dId: entry.dId ? entry.dId.normalize('NFC') : '',
+                desc: entry.desc ? entry.desc.normalize('NFC') : '',
+                mean: entry.mean ? entry.mean.normalize('NFC') : '',
+                group: entry.group ? entry.group.normalize('NFC') : ''
+            };
+            return [key, normalizedEntry];
         });
+        allEntries = normalizedData.sort(limbuSort);
+        filteredEntries = allEntries;
+        initialLoading.style.display = 'none';
+
+        // --- 4. Handle view from URL hash ---
+        if (window.location.hash.startsWith('#letter-')) {
+            const hashLetter = decodeURIComponent(window.location.hash.replace('#letter-', ''));
+            history.replaceState({ view: 'letter', letter: hashLetter }, '', window.location.hash);
+            showMainView();
+            currentLetter = hashLetter;
+            showLetterHeader(hashLetter);
+            filteredEntries = allEntries.filter(([k, e]) => fixStandaloneLimbu(e.dId || '')[0] === hashLetter);
+            container.innerHTML = '';
+            currentIndex = 0;
+            renderNextBatch();
+        } else if (window.location.hash === '#index') {
+            history.replaceState({ view: 'index' }, '', '#index');
+            showIndexView();
+        } else {
+            showMainView();
+            renderNextBatch();
+        }
+    } catch (err) {
+        console.error("❌ Init error:", err);
+        initialLoading.innerHTML = `<p class="error-message">Failed to load data: ${err.message}</p>`;
+        loadingIndicator.style.display = 'none';
+
+        const statusEl = document.getElementById("data-status");
+        if (statusEl) {
+            statusEl.textContent = `❌ Error: ${err.message}`;
+            statusEl.style.color = "red";
+            statusEl.style.display = "block";
+        }
+    }
 }
 
 initApp();

@@ -30,7 +30,7 @@ function showLetterHeader(letter) {
     selectedLetterHeader.style.display = 'block';
     selectedLetterHeader.innerHTML = `
         <div class="letter-header">
-            <span class="selected-limbu-letter">${letter}</span>
+            <span class="selected-limbu-letter" lang="lif">${letter}</span>
         </div>
     `;
 }
@@ -58,11 +58,7 @@ let isLoading = false;
 // --- Utilities ---
 function fixStandaloneLimbu(word) {
     if (!word) return 'Word Missing';
-    // If the first character is a combining mark, prepend the base character 'ᤀ'
-    if (word.charAt(0).match(limbuCombining)) {
-        return 'ᤀ' + word;
-    }
-    return word;
+    return word.replace(/(^|\s)([\u1920-\u193F])/g, '$1ᤀ$2');
 }
 
 function normalizeForSearch(text) {
@@ -92,14 +88,10 @@ function cleanMeaningText(entry) {
 }
 
 function createHeaderLine(entry) {
-    // Split multiple Limbu words by common delimiters and process each part
-    const primaryWords = (entry.dId || 'Word Missing')
-        .split(/[;,.\/]/)
-        .map(word => fixStandaloneLimbu(word.trim()))
-        .join(' / '); // Re-join with a consistent separator
-
+    const primaryWords = (entry.dId || 'Word Missing');
+    const correctedText = fixStandaloneLimbu(primaryWords);
     const secondaryInfo = entry.desc || '';
-    let header = `<span class="limbu-word">${primaryWords}</span>`;
+    let header = `<span class="limbu-word" lang="lif">${correctedText}</span>`;
     if (secondaryInfo) {
         header += `<span class="secondary-info">${secondaryInfo}</span>`;
         header += `<button class="tts-btn" data-text="${secondaryInfo}" title="Listen"><i class="bx bx-volume-full"></i></button>`;
@@ -123,6 +115,15 @@ function renderEntry(entryTuple, term) {
         <div class="meaning-text">${highlightText(cleanMeaningText(entry), term)}</div>
     `;
     container.appendChild(entryDiv);
+
+    // *** THE DEFINITIVE FIX ***
+    // This forces the browser to repaint the element, fixing complex script rendering bugs.
+    const limbuWordEl = entryDiv.querySelector('.limbu-word');
+    if (limbuWordEl) {
+        setTimeout(() => {
+            limbuWordEl.style.letterSpacing = '0.01px';
+        }, 1);
+    }
 
     const ttsBtn = entryDiv.querySelector('.tts-btn');
     if (ttsBtn) ttsBtn.addEventListener('click', () => speakNepali(ttsBtn.dataset.text));
@@ -223,6 +224,7 @@ function populateLetterIndex(letters) {
         const card = document.createElement('div');
         card.className = 'letter-group-card';
         card.textContent = letter;
+        card.setAttribute('lang', 'lif');
         card.addEventListener('click', () => {
             history.pushState({ view: 'letter', letter }, '', `#letter-${letter}`);
             showMainView();

@@ -58,7 +58,10 @@ let isLoading = false;
 // --- Utilities ---
 function fixStandaloneLimbu(word) {
     if (!word) return 'Word Missing';
-    if (word.charAt(0).match(limbuCombining)) return 'ᤀ' + word;
+    // If the first character is a combining mark, prepend the base character 'ᤀ'
+    if (word.charAt(0).match(limbuCombining)) {
+        return 'ᤀ' + word;
+    }
     return word;
 }
 
@@ -89,9 +92,14 @@ function cleanMeaningText(entry) {
 }
 
 function createHeaderLine(entry) {
-    const primaryWord = fixStandaloneLimbu(entry.dId || 'Word Missing');
+    // Split multiple Limbu words by common delimiters and process each part
+    const primaryWords = (entry.dId || 'Word Missing')
+        .split(/[;,.\/]/)
+        .map(word => fixStandaloneLimbu(word.trim()))
+        .join(' / '); // Re-join with a consistent separator
+
     const secondaryInfo = entry.desc || '';
-    let header = `<span class="limbu-word">${primaryWord}</span>`;
+    let header = `<span class="limbu-word">${primaryWords}</span>`;
     if (secondaryInfo) {
         header += `<span class="secondary-info">${secondaryInfo}</span>`;
         header += `<button class="tts-btn" data-text="${secondaryInfo}" title="Listen"><i class="bx bx-volume-full"></i></button>`;

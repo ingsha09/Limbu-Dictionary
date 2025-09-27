@@ -1,6 +1,6 @@
 # Limbu-Dictionary
 
-![Screenshot](images/Screenshot_2025-09-27-05-30-26-799_com.android.chrome.jpg)
+![Screenshot](images/Screenshot_2025-09-27-06-06-32-678_com.android.chrome.jpg)
 
 A modern, web-based **Limbu Dictionary** displaying Limbu words, meanings, and translations (Nepali/English). Users can search, browse by letter, and listen to word pronunciations. This project also provides a **public API** to fetch the dictionary data, allowing others to build their own apps or dictionaries using the same dataset.
 

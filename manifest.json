@@ -1,0 +1,18 @@
+{
+  "name": "Limbu Dictionary v3",
+  "short_name": "LimbuAPI",
+  "description": "Limbu-English-Nepali Dictionary with 8,000+ entries.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6c5ce7",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3843/3843930.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

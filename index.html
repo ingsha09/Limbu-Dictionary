@@ -3,62 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Limbu Dictionary App</title>
+    <title>LIMBU DICTIONARY V3</title>
     
-    <!-- Boxicons -->
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    
-    <!-- We only need to load the UI font (Poppins) from Google now -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- CSS -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6c5ce7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LimbuAPI">
+    <link rel="apple-touch-icon" href="icon-512.png">
+
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="v3-theme">
+    <div id="initial-loading">
+        <div class="loader-line"></div>
+        <p>INITIALIZING v3 ENGINE</p>
+    </div>
+
     <header>
-        <h1>Limbu Dictionary</h1>
-        <div class="header-actions">
-            <button id="view-by-letter-toggle" class="icon-btn" aria-label="View by Letter" title="View by Letter">
-                <i class='bx bxs-grid-alt'></i>
-            </button>
-            <button id="dark-mode-toggle" class="icon-btn" aria-label="Toggle Dark Mode" title="Toggle Dark Mode">
-                <i class="bx bx-moon"></i>
-            </button>
+        <div class="header-top">
+            <div class="brand">LIMBU DICTIONARY V3</div>
+            <div class="controls">
+                <button onclick="toggleModal('info-modal')" title="System Info"><i class="bx bx-info-circle"></i></button>
+                <button onclick="openReportModal('add')" title="Add Entry"><i class="bx bx-plus"></i></button>
+                <button id="theme-toggle"><i class="bx bx-moon"></i></button>
+                <button id="menu-toggle-btn" onclick="toggleAlphabet()"><i class="bx bx-menu-alt-right"></i></button>
+            </div>
+        </div>
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="SEARCH 8,000+ ENTRIES...">
+            <button id="reset-btn" onclick="resetAll()"><i class="bx bx-refresh"></i></button>
         </div>
     </header>
 
-    <div id="main-view">
-        <div id="controls">
-            <div class="search-container">
-                <i class="bx bx-search"></i>
-                <input type="text" id="search-input" placeholder="Search Limbu, English, or Nepali..." autocomplete="off">
+    <div id="filter-banner" class="status-bar" style="display: none;">
+        <span>INDEXED BY: <b id="active-char"></b></span>
+        <button onclick="resetAll()">CLEAR [X]</button>
+    </div>
+
+    <main id="dictionary-container"></main>
+
+    <div id="report-modal" class="modal">
+        <div class="modal-content dialogue-card">
+            <div class="modal-head">
+                <span id="report-title">SYSTEM ACTION</span>
+                <button onclick="closeReportModal()"><i class="bx bx-x"></i></button>
+            </div>
+            <div class="dialogue-body">
+                <div class="target-context">
+                    <label>TARGET DATA</label>
+                    <div id="report-context-value">INITIALIZING...</div>
+                </div>
+                <div class="field-wrapper">
+                    <label>SUBMISSION LOG</label>
+                    <textarea id="report-text" placeholder="Enter details (Limbu, English, Nepali meanings)..."></textarea>
+                </div>
+                <button class="confirm-btn" onclick="submitToGithub()">
+                    CONFIRM & OPEN GITHUB <i class="bx bx-right-arrow-alt"></i>
+                </button>
             </div>
         </div>
-        
-        <div id="selected-letter-header" style="display:none;"></div>
-
-        <div id="dictionary-container">
-            <div id="initial-loading" class="loading-message">Loading data, please wait...</div>
-        </div>
-        
-        <div id="loading-indicator" class="loading-message" style="display:none;"></div>
     </div>
 
-    <div id="letter-index-view" style="display:none;">
-        <div class="letter-index-header">
-            <h2>Dictionary Index</h2>
+    <div id="info-modal" class="modal">
+        <div class="modal-content dialogue-card">
+            <div class="modal-head">
+                <span>SYSTEM INFO</span>
+                <button onclick="toggleModal('info-modal')"><i class="bx bx-x"></i></button>
+            </div>
+            <div class="dialogue-body info-text-fix">
+                <p>This interface serves the <strong>Limbu Dictionary API v3</strong>.</p>
+                
+                <div id="stat-counter" style="font-size: 11px; margin-bottom: 20px; font-weight: 900; color: var(--accent); border: 1px solid var(--accent); padding: 8px; text-align: center;">
+                    DATABASE: <span id="total-count">0</span> SERIAL ENTRIES
+                </div>
+
+                <div class="link-grid">
+                    <a href="https://raw.githubusercontent.com/ingsha09/limbu-dictionary-api/main/data.json?v=3" target="_blank">RAW JSON SOURCE</a>
+                    <a href="https://github.com/ingsha09/limbu-dictionary-api" target="_blank">GITHUB REPO</a>
+                </div>
+                <div class="meta-tag" style="margin-top: 20px; opacity: 0.6; font-size: 10px;">CACHE_VERSION: v3.0.0</div>
+            </div>
         </div>
-        <div id="letter-list"></div>
     </div>
 
-    <!-- Scroll to Top Button -->
-    <button id="scroll-to-top-btn" class="icon-btn" title="Go to top">
-        <i class='bx bx-arrow-to-top'></i>
-    </button>
+    <div id="alphabet-modal" class="modal">
+        <div class="modal-content index-card">
+            <div class="modal-head">
+                <span>ALPHABET INDEX</span>
+                <button onclick="toggleAlphabet()"><i class="bx bx-x"></i></button>
+            </div>
+            <div class="alphabet-grid" id="alphabet-grid"></div>
+        </div>
+    </div>
 
-    <!-- JS -->
+    <div id="toast" class="toast-popup">COPIED TO CLIPBOARD</div>
+
     <script src="script.js"></script>
 </body>
 </html>

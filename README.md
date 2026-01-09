@@ -26,7 +26,7 @@ The frontend consumes a structured JSON dataset hosted via GitHub's CDN. The dat
 
 ### **API Used in the Dictionary**
 
-https://raw.githubusercontent.com/ingsha09/limbu-dictionary-api/main/data.json
+https://raw.githubusercontent.com/ingsha09/limbu-dictionary-api/
 
 ### **Data Structure (v3)**
 

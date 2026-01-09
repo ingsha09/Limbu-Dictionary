@@ -2,7 +2,12 @@
 
 A high-performance, mobile-first Progressive Web App (PWA) built to serve the **Limbu Dictionary API**. This interface provides instant access to over 8,000+ entries with support for the Sirijunga script.
 
+## Checkout the Limbu Dictionary v3/LimbuAPI
+
+➡️https://ingsha09.github.io/Limbu-Dictionary/
+
 ---
+
 
 ## 🚀 Key Features
 
@@ -20,9 +25,8 @@ A high-performance, mobile-first Progressive Web App (PWA) built to serve the **
 The frontend consumes a structured JSON dataset hosted via GitHub's CDN. The data is processed through a CI/CD pipeline to ensure technical accuracy and consistency.
 
 ### **API Endpoint:**
-```txt
+
 https://raw.githubusercontent.com/ingsha09/limbu-dictionary-api/main/data.json
-```
 
 ### **Data Structure (v3)**
 

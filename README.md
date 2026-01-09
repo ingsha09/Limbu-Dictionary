@@ -1,134 +1,69 @@
-# Limbu-Dictionary
+This README.md is designed to provide a professional overview of your project, making it easy for others to understand how the dictionary works, how the data is structured, and how the automation engine keeps it updated.
+README.md
+# ᤁᤡᤖᤠᤳ ᤕᤠᤰᤌᤢᤱ ᤐᤠᤴᤈᤡᤰ (Limbu Dictionary v3)
 
-![Screenshot](images/Screenshot_2025-09-27-08-47-39-320_mark.via.gp.jpg)
+A high-performance, mobile-first Progressive Web App (PWA) built to serve the **Limbu Dictionary API**. This interface provides instant access to over 8,000+ entries with support for the Sirijunga script, phonetic transcriptions, and dual-language meanings (English & Nepali).
 
-A modern, web-based **Limbu Dictionary** displaying Limbu words, meanings, and translations (Nepali/English). Users can search, browse by letter, and listen to word pronunciations. This project also provides a **public API** to fetch the dictionary data, allowing others to build their own apps or dictionaries using the same dataset.
+## 🚀 Key Features
 
----
-
-## 🔗 Live Demo
-
-You can view the live dictionary here:  
-👉 https://ingsha09.github.io/Limbu-Dictionary/
-
----
-
-## 📦 Features
-
-- Full Limbu dictionary with English and Nepali meanings.  
-- Search by Limbu, English, or Nepali text.  
-- Browse by Limbu letters (index view).  
-- Lazy-loading for performance on large datasets.  
-- Dark mode toggle.  
-- Text-to-Speech (TTS) for Nepali/English meanings.  
-- Fully responsive design.  
+* **PWA Ready:** Installable on Android and iOS devices for an app-like experience.
+* **Fast Search:** Optimized filtering across 8,000+ entries using a lightweight JavaScript engine.
+* **Alphabetical Indexing:** Quick-navigation grid based on the official Sirijunga alphabet order.
+* **Automated Data Engine:** Uses GitHub Actions to sanitize, sort, and re-index the dictionary data serially.
+* **Modern UI:** Features a minimalist technical aesthetic with full Dark Mode support and high-contrast elements.
+* **Offline Support:** Integrated Service Worker for reliable loading and asset caching.
 
 ---
 
-## 🌍 Public API
+## 🔌 API Information
 
-The dictionary data is publicly accessible through a JSON API, allowing developers to integrate this valuable lexical resource into their own applications.
+The frontend consumes a structured JSON dataset hosted via GitHub's CDN. The data is processed through a CI/CD pipeline to ensure technical accuracy and consistency.
 
----
+**API Endpoint:**
+`https://raw.githubusercontent.com/ingsha09/limbu-dictionary-api/main/data.json`
 
-## 📡 How to Use the API and Fetch Data
+### Data Structure (v3)
+Each entry in the API follows this standardized schema:
 
-You can access the entire Limbu dictionary dataset through a single API endpoint. The data is provided in a straightforward JSON format, making it easy to parse and use in any programming language.
-
-### API Endpoint
-
-https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@main/data.json
-
-### 🔄 Cache-Busting (Always Get Latest Data)
-
-Since jsDelivr caches files, sometimes updates may not appear immediately. To bypass cache and always fetch the latest version, append a **timestamp query parameter**:
-
-https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@main/data.json?t=12345
-
-Or in JavaScript, use `Date.now()` to auto-refresh:
-
-```js
-const API_URL = 'https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@main/data.json?t=' + Date.now();
-```
----
-
-
-## 📂 Data Structure
-
-The JSON data is structured as an object where each key is a Limbu word.
-
-Each entry looks like this:
-
-```
+```json
 {
-  "ᤀᤁ": {
-    "dId": "ᤀᤁ",
-    "desc": "Example word",
-    "mean": "Meaning in Nepali or English",
-    "group": "Optional group/category"
+  "id": "1",
+  "limbu": "ᤀ",
+  "phonetic": "a",
+  "group": "vowel",
+  "meaning": {
+    "en": "The first vowel letter of the Sirijunga alphabet.",
+    "ne": "सिरिजङ्गा वर्णमालाको पहिलो स्वरवर्ण ।"
   },
-  "ᤂᤃ": {
-    "dId": "ᤂᤃ",
-    "desc": "Another word",
-    "mean": "Meaning text",
-    "group": ""
-  }
-}
-```
-
--   **dId** → The Limbu word itself.
--   **desc** → Optional description or explanation.
--   **mean** → Meaning in Nepali/English.
--   **group** → Optional category/grouping.
-
----
-
-## ⚡ Fetching Data with JavaScript
-
-Here’s how you can use the dictionary API in your own projects:
-
-```
-// API endpoint for the Limbu dictionary data (with cache-busting)
-const API_URL = 'https://cdn.jsdelivr.net/gh/ingsha09/limbu-dictionary-data@main/data.json?t=' + Date.now();
-
-// Function to fetch and process the dictionary data
-async function getLimbuDictionary() {
-  try {
-    // Fetch the data from the API
-    const response = await fetch(API_URL);
-
-    // Check if the request was successful
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    // Parse the JSON response
-    const data = await response.json();
-
-    // Log the entire dictionary object
-    console.log(data);
-
-    // Example: access the meaning of a specific word
-    const word = 'ᤀᤁ';
-    if (data[word]) {
-      console.log(`The meaning of ${word} is: ${data[word].mean}`);
-    }
-
-  } catch (error) {
-    console.error('Error fetching the dictionary data:', error);
-  }
+  "status": "verified"
 }
 
-// Call the function to fetch the data
-getLimbuDictionary();
-```
+🛠️ Technology Stack
+ * Frontend: HTML5, CSS3 (Custom Variables), Vanilla JavaScript.
+ * Icons: Boxicons.
+ * Backend/Storage: JSON hosted on GitHub.
+ * Automation: GitHub Actions (Node.js runtime) for data re-indexing and sorting.
+ * App Manifest: Web App Manifest (PWA) & Service Workers.
+📂 Project Structure
+├── .github/workflows/
+│   └── format-json.yml   # The Automation Engine (Sorting & Re-indexing)
+├── index.html            # Core UI Structure & PWA Metadata
+├── style.css             # V3 Design System & Dark Mode Logic
+├── script.js             # API Fetching, Search & PWA Service Worker Registration
+├── sw.js                 # Offline Caching Logic
+├── manifest.json         # PWA Installation Config
+├── data.json             # The Dictionary Database
+└── icon-512.png          # App Icon (LA v3 Branding)
 
----
-
-## 🤝 Contributing
-
-If you’d like to contribute:
-
-1. Fork this repo.
-2. Edit or add new words in the data repo: https://github.com/ingsha09/limbu-dictionary-data
-3. Submit a pull request.
+⚙️ How the Automation Works
+This project features a Self-Cleaning Database. Whenever the data.json is updated:
+ * Sanitization: Leading hyphens are removed from Limbu words and HTML tags are stripped.
+ * Phonetic Cleanup: All brackets and slashes are removed from the phonetic field for a clean UI.
+ * Sirijunga Sorting: Entries are sorted according to the traditional Limbu alphabetical order.
+ * Serial Re-indexing: IDs are reassigned from 1 to N so the database remains perfectly sequential.
+🤝 Contributing & Feedback
+Suggestions for new words or corrections can be submitted directly through the interface:
+ * Click the [+] button to suggest a new entry.
+ * Click Suggest Edit on any existing card.
+ * Submissions are tracked as GitHub Issues on the Limbu Dictionary API Repository.
+Maintained by ingsha09

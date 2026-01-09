@@ -24,7 +24,7 @@ A high-performance, mobile-first Progressive Web App (PWA) built to serve the **
 
 The frontend consumes a structured JSON dataset hosted via GitHub's CDN. The data is processed through a CI/CD pipeline to ensure technical accuracy and consistency.
 
-### **API Endpoint:**
+### **API Used in the Dictionary**
 
 https://raw.githubusercontent.com/ingsha09/limbu-dictionary-api/main/data.json
 
@@ -60,29 +60,16 @@ Each entry in the API follows this standardized schema:
 ## 📂 Project Structure
 
 ```plaintext
-├── .github/workflows/
-│   └── format-json.yml   # The Automation Engine (Sorting & Re-indexing)
 ├── index.html            # Core UI Structure & PWA Metadata
 ├── style.css             # V3 Design System & Dark Mode Logic
 ├── script.js             # API Fetching, Search & PWA Service Worker Registration
 ├── sw.js                 # Offline Caching Logic
 ├── manifest.json         # PWA Installation Config
-├── data.json             # The Dictionary Database
 └── icon-512.png          # App Icon (LA v3 Branding)
 ```
 
 ---
 
-## ⚙️ How the Automation Works
-
-This project features a Self-Cleaning Database. Whenever the `data.json` is updated:
-
-- **Sanitization:** Leading hyphens are removed from Limbu words and HTML tags are stripped.
-- **Phonetic Cleanup:** All brackets and slashes are removed from the phonetic field for a clean UI.
-- **Sirijunga Sorting:** Entries are sorted according to the traditional Limbu alphabetical order.
-- **Serial Re-indexing:** IDs are reassigned from 1 to N so the database remains perfectly sequential.
-
----
 
 ## 🤝 Contributing & Feedback
 

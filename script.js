@@ -1,4 +1,4 @@
-const API_URL = 'https://raw.githubusercontent.com/ingsha09/limbu-dictionary-api/main/data.json?v=3';
+const API_URL = 'https://raw.githubusercontent.com/ingsha09/limbu-dictionary-api/main/data.json';
 const REPO = 'https://github.com/ingsha09/limbu-dictionary-api';
 const limbuAlphabet = ['ᤀ', 'ᤁ', 'ᤂ', 'ᤃ', 'ᤄ', 'ᤅ', 'ᤆ', 'ᤇ', 'ᤈ', 'ᤋ', 'ᤌ', 'ᤍ', 'ᤎ', 'ᤏ', 'ᤐ', 'ᤑ', 'ᤒ', 'ᤓ', 'ᤔ', 'ᤕ', 'ᤖ', 'ᤗ', 'ᤘ', 'ᤙ', 'ᤛ', 'ᤜ'];
 

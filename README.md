@@ -1,10 +1,6 @@
-# ᤁᤡᤖᤠᤳ ᤕᤠᤰᤌᤢᤱ ᤐᤠᤴᤈᤡᤰ (Limbu Dictionary v3)
+# Limbu Dictionary
 
 A high-performance, mobile-first Progressive Web App (PWA) built to serve the **Limbu Dictionary API**. This interface provides instant access to over 8,000+ entries with support for the Sirijunga script.
-
-## Checkout the Limbu Dictionary v3/LimbuAPI
-
-➡️https://ingsha09.github.io/Limbu-Dictionary/
 
 ---
 
@@ -26,9 +22,9 @@ The frontend consumes a structured JSON dataset hosted via GitHub's CDN. The dat
 
 ### **API Used in the Dictionary**
 
-https://raw.githubusercontent.com/ingsha09/limbu-dictionary-api
+https://ingsha09.github.io/limbu-dictionary-api/
 
-### **Data Structure (v3)**
+### **Data Structure**
 
 Each entry in the API follows this standardized schema:
 ```json
